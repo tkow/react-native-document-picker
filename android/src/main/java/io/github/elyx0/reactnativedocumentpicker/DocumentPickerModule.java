@@ -205,7 +205,7 @@ public class DocumentPickerModule extends ReactContextBaseJavaModule {
 
 				if (uri != null && "content".equals(uri.getScheme())) {
 					int flag = cursor.getInt(0);
-					if(isVirtualFile(flag)) {
+					if(isVirtualFile(contentResolver,uri)) {
 						try {
 							InputStream input = DocumentPickerModule.getInputStreamForVirtualFile(contentResolver,uri,contentResolver.getType(uri));
 							File file = new File(getReactApplicationContext().getCacheDir(),fileName);
