@@ -204,29 +204,23 @@ public class DocumentPickerModule extends ReactContextBaseJavaModule {
 				}
 
 				if (uri != null && "content".equals(uri.getScheme())) {
-					int flag = cursor.getInt(0);
-					if(isVirtualFile(contentResolver,uri)) {
-						try {
-							InputStream input = DocumentPickerModule.getInputStreamForVirtualFile(contentResolver,uri,contentResolver.getType(uri));
-							File file = new File(getReactApplicationContext().getCacheDir(),fileName);
-							OutputStream output = new FileOutputStream(file);
-							byte[] buffer = new byte[4 * 1024]; // or other buffer size
-							int read;
-							while ((read = input.read(buffer)) != -1) {
-								output.write(buffer, 0, read);
-							}
-							output.flush();
-							map.putString(FIELD_URI, file.getPath());
-						} catch (IOException e) {
-							throw new FileNotFoundException();
+					try {
+						InputStream input = DocumentPickerModule.getInputStreamForVirtualFile(contentResolver,uri,contentResolver.getType(uri));
+						File file = new File(getReactApplicationContext().getCacheDir(),fileName);
+						OutputStream output = new FileOutputStream(file);
+						byte[] buffer = new byte[4 * 1024]; // or other buffer size
+						int read;
+						while ((read = input.read(buffer)) != -1) {
+							output.write(buffer, 0, read);
 						}
-					} else {
-						map.putString(FIELD_URI, uri.toString());
+						output.flush();
+						map.putString(FIELD_URI, file.getPath());
+					} catch (IOException e) {
+						throw new FileNotFoundException();
 					}
 				} else {
 					map.putString(FIELD_URI, uri.toString());
 				}
-
 
 				if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
 					int mimeIndex = cursor.getColumnIndex(DocumentsContract.Document.COLUMN_MIME_TYPE);
@@ -247,27 +241,6 @@ public class DocumentPickerModule extends ReactContextBaseJavaModule {
 		}
 
 		return map;
-	}
-
-	private static boolean isVirtualFile(ContentResolver resolver, 	Uri uri) {
-		try {
-			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-				Cursor cursor = resolver.query(
-						uri,
-						new String[]{DocumentsContract.Document.COLUMN_FLAGS},
-						null, null, null);
-				int flags = 0;
-				if (cursor.moveToFirst()) {
-					flags = cursor.getInt(0);
-				}
-				cursor.close();
-				return (flags & DocumentsContract.Document.FLAG_VIRTUAL_DOCUMENT) != 0;
-			} else {
-				return false;
-			}
-		} catch (Exception e) {
-			return false;
-		}
 	}
 
 	private static InputStream getInputStreamForVirtualFile(ContentResolver resolver, Uri uri, String mimeTypeFilter)
