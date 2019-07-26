@@ -222,6 +222,7 @@ public class DocumentPickerModule extends ReactContextBaseJavaModule {
 					map.putString(FIELD_URI, uri.toString());
 				}
 
+
 				if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
 					int mimeIndex = cursor.getColumnIndex(DocumentsContract.Document.COLUMN_MIME_TYPE);
 					if (!cursor.isNull(mimeIndex)) {
